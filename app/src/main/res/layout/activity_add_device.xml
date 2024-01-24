@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/img_1"
+    tools:context=".AddDevice">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="29dp"
+        android:layout_marginEnd="102dp"
+        android:text="Add a Device"
+        android:textColor="@color/white"
+        android:textSize="35dp" />
+
+
+    <TextView
+        android:id="@+id/Smartphone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="1dp"
+        android:layout_marginTop="155dp"
+        android:layout_marginEnd="-2dp"
+        android:background="#30ffffff"
+        android:drawableLeft="@drawable/baseline_phone_android_24"
+        android:drawablePadding="20dp"
+        android:hint="Add a Smartphone"
+        android:padding="20dp"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/Smartwatch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="278dp"
+        android:layout_marginEnd="-1dp"
+        android:background="#30ffffff"
+        android:drawableLeft="@drawable/baseline_watch_24"
+        android:drawablePadding="20dp"
+        android:hint="Add a Smart Watch"
+        android:padding="20dp"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white"
+        android:textSize="20sp" />
+
+
+</RelativeLayout>

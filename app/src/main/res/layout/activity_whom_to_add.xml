@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/img_1"
+    tools:context=".WhomToAdd">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="33dp"
+        android:text="Just a few steps lefts"
+        android:textColor="@color/white"
+        android:textSize="35dp" />
+
+    <TextView
+        android:id="@+id/Child"
+        android:layout_width="410dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="133dp"
+        android:background="#30ffffff"
+        android:drawableLeft="@drawable/baseline_child_care_24"
+        android:drawablePadding="20dp"
+        android:hint="Add Your Child"
+        android:padding="20dp"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white"
+        android:textSize="20sp" />
+
+
+    <TextView
+        android:id="@+id/family"
+        android:layout_width="411dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="-3dp"
+        android:layout_marginTop="243dp"
+        android:layout_marginEnd="3dp"
+        android:background="#30ffffff"
+        android:drawableLeft="@drawable/baseline_family_restroom_24"
+        android:drawablePadding="20dp"
+        android:hint="Add Your family "
+        android:padding="20dp"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white"
+        android:textSize="20sp"/>
+
+
+</RelativeLayout>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "459444597638",
+    "project_id": "location-bebe0",
+    "storage_bucket": "location-bebe0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:459444597638:android:dff5f03152cb28c2453207",
+        "android_client_info": {
+          "package_name": "com.example.location"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_I77SisYQW-2WGdtDPSYeJKlAnAXKMcM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
