@@ -10,7 +10,7 @@ package com.example.location;
 
 
 
-
+//
 //import android.annotation.SuppressLint;
 //import android.app.Service;
 //import android.content.Intent;
@@ -140,6 +140,10 @@ package com.example.location;
 //}
 
 
+
+
+
+
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
@@ -164,7 +168,6 @@ public class LocationUpdateService extends Service {
     private static final String TAG = "LocationUpdateService";
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
-
     private LocationRequest locationRequest;
     private DatabaseReference locationsRef;
 
@@ -175,8 +178,8 @@ public class LocationUpdateService extends Service {
 
         // Initialize Firebase Realtime Database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-       // locationsRef = database.getReference("users").child("locations");
-        locationsRef = database.getReference("users");
+        locationsRef = database.getReference("users").child("locations");
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         // Setting up the location request with a shorter interval and distance
@@ -194,7 +197,7 @@ public class LocationUpdateService extends Service {
                     Log.d(TAG, "Location Updated: " + location.getLatitude() + ", " + location.getLongitude());
 
                     // Update Realtime Database with the new location
-//                    updateLocationInRealtimeDatabase(location.getLatitude(), location.getLongitude());
+                    updateLocationInRealtimeDatabase(location.getLatitude(), location.getLongitude());
                 }
             }
         };
@@ -204,22 +207,22 @@ public class LocationUpdateService extends Service {
     }
 
     // Method to update location data in Realtime Database
-//    private void updateLocationInRealtimeDatabase(double latitude, double longitude) {
-//        // Assume userId is the unique identifier for each user
-////        String userId = "user123";
-////
-////        // Create a new location model with the updated values
-////        LocationModel location = new LocationModel(latitude, longitude, System.currentTimeMillis());
-////
-////        // Add the location to Realtime Database
-////        locationsRef.child(userId).push().setValue(location, (databaseError, databaseReference) -> {
-////            if (databaseError == null) {
-////                Log.d(TAG, "Location added successfully");
-////            } else {
-////                Log.e(TAG, "Error adding location", databaseError.toException());
-////            }
-////        });
-//    }
+    private void updateLocationInRealtimeDatabase(double latitude, double longitude) {
+        // Assume userId is the unique identifier for each user
+        String userId = "user123";
+
+        // Create a new location model with the updated values
+        LocationModel location = new LocationModel(latitude, longitude, System.currentTimeMillis());
+
+        // Add the location to Realtime Database
+        locationsRef.child(userId).push().setValue(location, (databaseError, databaseReference) -> {
+            if (databaseError == null) {
+                Log.d(TAG, "Location added successfully");
+            } else {
+                Log.e(TAG, "Error adding location", databaseError.toException());
+            }
+        });
+    }
 
     @Nullable
     @Override

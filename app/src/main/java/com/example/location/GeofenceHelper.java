@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.util.Log;
 
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.Geofence;
@@ -11,11 +12,15 @@ import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GeofenceHelper extends ContextWrapper {
 
     private static final String TAG = "GeofenceHelper";
     static PendingIntent pendingIntent;
 
+    private List<Geofence> registeredGeofences = new ArrayList<>();
     public GeofenceHelper(Context base) {
         super(base);
     }
@@ -38,7 +43,7 @@ public class GeofenceHelper extends ContextWrapper {
                 .build();
     }
 
-    public PendingIntent getPendingIntent() {
+    public PendingIntent getPendingIntent(String geofenceAction) {
         if(pendingIntent != null){
             return pendingIntent;
         }
@@ -66,5 +71,12 @@ public class GeofenceHelper extends ContextWrapper {
             }
         }
         return e.getLocalizedMessage();
+    }
+
+
+    public void logRegisteredGeofences() {
+        for (Geofence geofence : registeredGeofences) {
+            Log.d(TAG, "Registered Geofence ID: " + geofence.getRequestId());
+        }
     }
 }

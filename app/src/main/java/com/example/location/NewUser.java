@@ -1,5 +1,4 @@
 package com.example.location;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -19,10 +18,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class NewUser extends AppCompatActivity {
 
@@ -32,7 +34,6 @@ public class NewUser extends AppCompatActivity {
     private ImageView googleSignInButton;
 
     private GoogleSignInClient googleSignInClient;
-
 
     private static final int RC_SIGN_IN = 123;
 
@@ -59,7 +60,6 @@ public class NewUser extends AppCompatActivity {
         haveanaccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Intent myInt = new Intent(getApplicationContext(), LoginActivity.class);
                 startActivity(myInt);
                 finish();
@@ -72,9 +72,16 @@ public class NewUser extends AppCompatActivity {
                 registerUser();
             }
         });
+
+        configureGoogleSignIn();
+
+        googleSignInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                signInWithGoogle();
+            }
+        });
     }
-
-
 
     private void registerUser() {
         String name = nameEditText.getText().toString().trim();
@@ -83,7 +90,7 @@ public class NewUser extends AppCompatActivity {
         String password = passwordEditText.getText().toString().trim();
         String confirmPassword = confirmPasswordEditText.getText().toString().trim();
 
-        // Perform validation checks
+        // Checking that all fields are filled with the appropriate information
         if (name.isEmpty() || mobile.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             Toast.makeText(this, "All fields are required", Toast.LENGTH_SHORT).show();
             return;
@@ -103,45 +110,22 @@ public class NewUser extends AppCompatActivity {
                             // Registration successful
                             Toast.makeText(NewUser.this, "Registration successful", Toast.LENGTH_SHORT).show();
 
-                            // Add logic to navigate to the next activity
+                            // Get the current user
+                            FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+                            if (currentUser != null) {
+                                // Store user's name and mobile number in the Firebase Realtime Database
+                                DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(currentUser.getUid());
+                                userRef.child("name").setValue(name);
+                                userRef.child("mobile").setValue(mobile);
+                            }
+
+
                             Intent myIntent = new Intent(NewUser.this, WhomToAdd.class);
                             startActivity(myIntent);
                             finish(); // Optional: finish the current activity if needed
                         } else {
-                            // If registration fails, display a message to the user.
+                            // If registration fails, display a message.
                             Toast.makeText(NewUser.this, "Registration failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-
-    configureGoogleSignIn();
-
-
-
-        googleSignInButton.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            signInWithGoogle();
-        }
-    });
-}
-
-    private void loginUser(String email, String password) {
-        firebaseAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-
-                            FirebaseUser user = firebaseAuth.getCurrentUser();
-                            Toast.makeText(NewUser.this, "Login successful: " + user.getEmail(), Toast.LENGTH_SHORT).show();
-
-                            Intent intent = new Intent(NewUser.this, WhomToAdd.class);
-                            startActivity(intent);
-                            finish();
-                        } else {
-
-                            Toast.makeText(NewUser.this, "Login failed. Please check your credentials.", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -154,7 +138,6 @@ public class NewUser extends AppCompatActivity {
                 .build();
 
         googleSignInClient = GoogleSignIn.getClient(this, gso);
-
     }
 
     private void signInWithGoogle() {
@@ -168,17 +151,16 @@ public class NewUser extends AppCompatActivity {
 
         if (requestCode == RC_SIGN_IN) {
             // Google Sign In was successful, authenticate with Firebase
-            com.google.android.gms.tasks.Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleGoogleSignInResult(task);
         }
     }
 
-    private void handleGoogleSignInResult(com.google.android.gms.tasks.Task<GoogleSignInAccount> completedTask) {
+    private void handleGoogleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             if (account != null) {
-                //  The Google ID token and authenticate with Firebase
+                // The Google ID token and authenticate with Firebase
                 String idToken = account.getIdToken();
                 authenticateWithFirebase(idToken);
             } else {
@@ -189,122 +171,24 @@ public class NewUser extends AppCompatActivity {
         }
     }
 
-
     private void authenticateWithFirebase(String idToken) {
-        com.google.firebase.auth.AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
 
         firebaseAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new com.google.android.gms.tasks.OnCompleteListener<com.google.firebase.auth.AuthResult>() {
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
-                    public void onComplete(@NonNull com.google.android.gms.tasks.Task<com.google.firebase.auth.AuthResult> task) {
+                    public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-
                             FirebaseUser user = firebaseAuth.getCurrentUser();
 
                             Intent intent = new Intent(NewUser.this, WhomToAdd.class);
                             startActivity(intent);
                             finish();
                             Toast.makeText(NewUser.this, "Authentication successful: " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
-
                         } else {
-
                             Toast.makeText(NewUser.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
     }
 }
-
-
-
-
-//
-//import android.content.Intent;
-//import android.os.Bundle;
-//import android.view.View;
-//import android.widget.Button;
-//import android.widget.EditText;
-//import android.widget.TextView;
-//import android.widget.Toast;
-//
-//import androidx.appcompat.app.AppCompatActivity;
-//
-//import com.google.firebase.FirebaseApp;
-//import com.google.firebase.auth.FirebaseAuth;
-//import com.google.firebase.auth.FirebaseUser;
-//
-//public class NewUser extends AppCompatActivity {
-//
-//    private EditText username;
-//    private EditText usermobilenumber;
-//    private EditText email;
-//    private EditText password;
-//    private EditText confirmpassword;
-//    private TextView haveanaccount;
-//    private Button buttonLogin;
-//    private FirebaseAuth firebaseAuth;
-//
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_new_user);
-//
-//        FirebaseApp.initializeApp(this);
-//        firebaseAuth = FirebaseAuth.getInstance();
-//
-//        TextView btn1 = findViewById(R.id.haveanaccount);
-//        Button btn = findViewById(R.id.done);
-//        EditText username = findViewById(R.id.username);
-//        EditText usermobilenumber = findViewById(R.id.usermobilenumber);
-//        EditText email = findViewById(R.id.email);
-//        EditText password = findViewById(R.id.password);
-//        EditText confirmpassword = findViewById(R.id.confirmpassword);
-//
-//
-//        btn1.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//                Intent myInt = new Intent(getApplicationContext(), LoginActivity.class);
-//                myInt.putExtra("userEmail", email.getText().toString());
-//                startActivity(myInt);
-//                finish();
-//            }
-//        });
-//
-//        btn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Toast.makeText(NewUser.this, "Done", Toast.LENGTH_SHORT).show();
-//
-//                Intent myInt = new Intent(getApplicationContext(), WhomToAdd.class);
-//                myInt.putExtra("userEmail", email.getText().toString());
-//                Toast.makeText(NewUser.this, "Welcome", Toast.LENGTH_SHORT).show();
-//                startActivity(myInt);
-//                finish();
-//            }
-//        });
-//    }
-//}
-//
-//        }
-//
-//
-//    @Override
-//    protected void onStart() {
-//        super.onStart();
-//
-//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-//        if (user != null) {
-//            Intent i = new Intent(NewUser.this, MainActivity.class);
-//            startActivity(i);
-//            finish();
-//        }
-//    }
-//
-//
-//
-//    }
-
-
-

@@ -3,6 +3,7 @@ package com.example.location;
 import static android.content.ContentValues.TAG;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -24,7 +25,6 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -34,11 +34,16 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-public class MainActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener {
+
+
+
+public class MainActivity extends FragmentActivity implements GoogleMap.OnMapLongClickListener , GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener , OnMapReadyCallback{
     private final int FINE_PERMISSION_CODE = 1;
     private GoogleMap mMap;
     private GeofencingClient geofencingClient;
-    private com.example.location.GeofenceHelper geofenceHelper;
+
+    private GeofenceHelper geofenceHelper;
+
     Location currentLocation;
     private static final int BACKGROUND_LOCATION_ACCESS_REQUEST_CODE = 1001;
     private float GEOFENCE_RADIUS = 200f;
@@ -46,7 +51,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     FusedLocationProviderClient fusedLocationProviderClient;
     private GeofenceBroadcastReceiver geofenceBroadcastReceiver;
 
-
+    public static final String GEOFENCE_ACTION = "com.example.location.GEOFENCE_ACTION";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +70,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         // This is new on 12/12/2023 up to intentfilter
         // Initialize and register the GeofenceReceiver
         geofenceBroadcastReceiver = new GeofenceBroadcastReceiver();
-        IntentFilter intentFilter = new IntentFilter("your.geofence.action");
+        IntentFilter intentFilter = new IntentFilter(GEOFENCE_ACTION);
         registerReceiver(geofenceBroadcastReceiver, intentFilter);
 
 
@@ -110,37 +115,74 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+//    @Override
+//    public void onMapReady(GoogleMap googleMap) {
+//        mMap = googleMap;
+//
+//        // Add a marker in Sydney and move the camera
+//        LatLng MyLocation = new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude());
+//        mMap.addMarker(new MarkerOptions().position(MyLocation).title("My Location"));
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(MyLocation));
+//        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MyLocation,16f));
+//
+//        mMap.setMapType( mMap.getMapType() ==
+//                GoogleMap.MAP_TYPE_NORMAL ?
+//                GoogleMap.MAP_TYPE_SATELLITE :
+//                GoogleMap.MAP_TYPE_NORMAL);
+//        mMap.setOnMapLongClickListener(this);
+//
+//    }
+
+    @SuppressLint("MissingPermission")
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        LatLng MyLocation = new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude());
-        mMap.addMarker(new MarkerOptions().position(MyLocation).title("My Location"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(MyLocation));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MyLocation,16f));
-
+    public void onMapReady(GoogleMap map) {
+        mMap = map;
         mMap.setMapType( mMap.getMapType() ==
                 GoogleMap.MAP_TYPE_NORMAL ?
                 GoogleMap.MAP_TYPE_SATELLITE :
                 GoogleMap.MAP_TYPE_NORMAL);
-        mMap.setOnMapLongClickListener(this);
-
+        // TODO: Before enabling the My Location layer, you must request
+        // location permission from the user. This sample does not include
+        // a request for location permission.
+        map.setMyLocationEnabled(true);
+        map.setOnMyLocationButtonClickListener(this);
+        map.setOnMyLocationClickListener(this);
+        map.setOnMapLongClickListener(this);
     }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == FINE_PERMISSION_CODE){
-            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                getLastLocation();
-            } else {
-                Toast.makeText(this, "Location Permission is needed", Toast.LENGTH_SHORT).show();
-            }
+    /**
+     * Enables the My Location layer if the fine location permission has been granted.
+     */
+    @SuppressLint("MissingPermission")
+    private void enableMyLocation() {
+        // 1. Check if permissions are granted, if so, enable the my location layer
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+            return;
         }
     }
 
-    public void onMapLongClick(LatLng latLng) {
+    @Override
+    public void onMyLocationClick(@NonNull Location location) {
+        Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG)
+                .show();
+    }
+
+    @Override
+    public boolean onMyLocationButtonClick() {
+        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT)
+                .show();
+        // Return false so that we don't consume the event and the default behavior still occurs
+        // (the camera animates to the user's current position).
+        return false;
+    }
+
+
+
+    public void onMapLongClick(@NonNull LatLng latLng) {
+
 
         if (Build.VERSION.SDK_INT >= 29) {
             //We need background permission
@@ -155,6 +197,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         } else {
+
             handelMapLongClick(latLng);
         }
     }
@@ -163,12 +206,16 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         addMarker(latLng);
         addCircle(latLng, GEOFENCE_RADIUS);
         addGeofence(latLng, GEOFENCE_RADIUS);
+
     }
     private void addGeofence(LatLng latLng, float radius) {
         Geofence geofence = geofenceHelper.getGeofence(GEOFENCE_ID, latLng, radius, Geofence.GEOFENCE_TRANSITION_ENTER |
                 Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_EXIT);
         GeofencingRequest geofencingRequest = geofenceHelper.geofencingRequest(geofence);
-        PendingIntent pendingIntent = geofenceHelper.getPendingIntent();
+        PendingIntent pendingIntent = geofenceHelper.getPendingIntent(GEOFENCE_ACTION);
+
+        Intent serviceIntent = new Intent(this, GeofenceService.class);
+        this.startService(serviceIntent);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -181,6 +228,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},FINE_PERMISSION_CODE);
             return;
         }
+
         geofencingClient.addGeofences(geofencingRequest, pendingIntent)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -195,6 +243,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                         Log.d(TAG,"onFailure:" + errorMessage);
                     }
                 });
+    }
+    private void checkRegisteredGeofences() {
+        geofenceHelper.logRegisteredGeofences();
     }
     private void addMarker(LatLng latLng) {
         MarkerOptions markerOptions = new MarkerOptions().position(latLng);
